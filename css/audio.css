@@ -4,15 +4,15 @@
    Uses the app's existing CSS variables so light/dark themes work.
    ============================================================ */
 
-/* segmented control (accent / speed / repeat) */
+/* ---------- Segmented control (accent / speed / repeat) ---------- */
 .audio-seg {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm, 10px);
   background: var(--bg);
-  flex-wrap: wrap;
 }
 
 .audio-seg button {
@@ -21,6 +21,7 @@
   background: transparent;
   color: var(--primary);
   font: inherit;
+  line-height: 1.2;
   font-size: 0.85rem;
   padding: 0.35rem 0.7rem;
   border-radius: calc(var(--radius-sm, 10px) - 4px);
@@ -28,10 +29,18 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 
+.audio-seg button:hover {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
 .audio-seg button[aria-pressed="true"] {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary, #fff);
   font-weight: 600;
+}
+
+.audio-seg button[aria-pressed="true"]:hover {
+  background: var(--primary);
 }
 
 .audio-seg button:focus-visible {
@@ -39,11 +48,21 @@
   outline-offset: 1px;
 }
 
-/* volume row */
-.audio-vol-row { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
-.audio-vol { flex: 1 1 160px; max-width: 220px; accent-color: var(--primary); }
+/* ---------- Volume row ---------- */
+.audio-vol-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
 
-/* custom sentence input */
+.audio-vol {
+  flex: 1 1 160px;
+  max-width: 220px;
+  accent-color: var(--primary);
+}
+
+/* ---------- Custom sentence input ---------- */
 .audio-custom {
   width: 100%;
   max-width: 420px;
@@ -54,52 +73,97 @@
   color: var(--primary);
   font: inherit;
 }
-.audio-custom:focus { outline: 2px solid var(--focus-ring, var(--primary)); outline-offset: 1px; }
 
-/* sentence preview chip */
+.audio-custom:focus {
+  outline: 2px solid var(--focus-ring, var(--primary));
+  outline-offset: 1px;
+}
+
+/* ---------- Sentence preview chip ---------- */
 .audio-sentence-preview {
   margin: 0.2rem 0 0.6rem;
   padding: 0.45rem 0.7rem;
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm, 10px);
   color: var(--primary);
-  background: var(--primary-tint, transparent);
+  background: var(--primary-tint,
+    color-mix(in srgb, var(--primary) 8%, transparent));
   min-height: 1.2em;
 }
 
-/* speaking practice card */
-.audio-practice { margin: 0.6rem 0; }
+/* ---------- Speaking practice card ---------- */
+.audio-practice {
+  margin: 0.6rem 0;
+}
+
 .audio-practice > summary {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  cursor: pointer;
+  padding: 0.4rem 0.2rem;
   font-weight: 600;
   color: var(--primary);
-  padding: 0.4rem 0.2rem;
+  cursor: pointer;
   list-style: none;
 }
-.audio-practice > summary::-webkit-details-marker { display: none; }
-.audio-practice .more-section-content { margin-top: 0.4rem; }
 
-/* action rows */
-.audio-actions { flex-wrap: wrap; gap: 0.4rem; }
-
-/* small polish: keep select/input rows from overflowing on narrow screens */
-.audio-panel .setting-row select,
-.audio-panel .setting-row input[type="text"] { max-width: 100%; }
-
-/* recording pulse dot */
-.audio-panel.is-recording .audio-actions { animation: audio-pulse 1.2s ease-in-out infinite; }
-@keyframes audio-pulse { 50% { opacity: 0.65; } }
-
-/* respect reduced-motion */
-@media (prefers-reduced-motion: reduce) {
-  .audio-panel.is-recording .audio-actions { animation: none; }
+.audio-practice > summary::-webkit-details-marker {
+  display: none;
 }
 
-/* narrow screens: keep the 3-option segmented controls on one line */
+.audio-practice .more-section-content {
+  margin-top: 0.4rem;
+}
+
+/* ---------- Action rows ---------- */
+.audio-actions {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  position: relative;
+}
+
+/* ---------- Prevent overflow on narrow screens ---------- */
+.audio-panel .setting-row select,
+.audio-panel .setting-row input[type="text"] {
+  max-width: 100%;
+}
+
+/* ---------- Recording pulse dot ---------- */
+.audio-panel.is-recording .audio-actions::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: audio-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes audio-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .audio-panel.is-recording .audio-actions::after {
+    animation: none;
+  }
+}
+
+/* ---------- Narrow screens: keep 3-option segmented controls on one line ---------- */
 @media (max-width: 400px) {
-  .audio-seg { gap: 3px; padding: 3px; }
-  .audio-seg button { padding: 0.35rem 0.5rem; font-size: 0.8rem; }
+  .audio-seg {
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .audio-seg button {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+  }
 }
