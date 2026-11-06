@@ -1,0 +1,264 @@
+/* ============================================================
+   LingoStep — themes.css  (v10 design tokens)
+   The SINGLE source of truth for colors, radii, shadows and
+   gradients. Every other stylesheet consumes these tokens —
+   no component file defines its own palette anymore.
+
+   Design direction: premium modern educational app.
+   Deep-sky blue → turquoise brand, clean white surfaces,
+   soft gradients, airy rounded cards, subtle blue shadows.
+   Semantic colors keep their meaning everywhere:
+   green = correct/locked · turquoise = hint · red = wrong.
+   ============================================================ */
+
+:root {
+  /* ---------- shape & rhythm ---------- */
+  --radius: 22px;
+  --radius-lg: 26px;
+  --radius-sm: 16px;
+  --nav-h: 4.4rem;
+
+  /* ---------- type ---------- */
+  --font: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui,
+    -apple-system, "Noto Sans", "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+
+  /* ---------- light theme (default) ---------- */
+  --bg: #f2f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef6fa;
+  --surface-blur: rgba(255, 255, 255, .88);
+  --border: #e3edf3;
+  --border-strong: #cfdfe9;
+  --text: #0c2233;
+  --muted: #587285;
+
+  /* brand: blue → turquoise */
+  --primary: #0d8ecf;
+  --primary-strong: #0b76ad;
+  --primary-deep: #0a3d5c;
+  --primary-soft: #b5e2f7;
+  --primary-tint: #e9f7fd;
+  --focus-ring: #0d8ecf;
+  --turquoise: #12c3ae;
+  --turquoise-strong: #0da393;
+  --turquoise-tint: #e0f7f3;
+
+  /* brand gradients */
+  --grad: linear-gradient(135deg, #0d8ecf 0%, #10aab8 55%, #12c3ae 100%);
+  --grad-soft: linear-gradient(135deg, rgba(13, 142, 207, .10), rgba(18, 195, 174, .10));
+  --grad-strong: linear-gradient(135deg, #0b76ad 0%, #0da393 100%);
+  --header-grad: linear-gradient(180deg, #ffffff 0%, #f6fbfd 100%);
+  --hero-grad: linear-gradient(140deg, #0d8ecf 0%, #109fc2 48%, #12c3ae 100%);
+  --nav-bg: rgba(255, 255, 255, .92);
+
+  /* pastel family (stat tiles, icon chips) */
+  --mint: #e9f7fd;
+  --blue-soft: #a9dcf3;
+  --blue-tint: #e9f7fd;
+  --pink-soft: #ffd9b0;
+  --pink-tint: #fff4e6;
+  --yellow-soft: #ffd98e;
+  --yellow-tint: #fff6e0;
+
+  /* support accents */
+  --purple: #7a7fd0;
+  --purple-strong: #5d62b8;
+  --purple-tint: #efeffb;
+
+  /* semantics: green correct · turquoise hint · red wrong */
+  --success: #17a558;
+  --success-strong: #128545;
+  --success-tint: #e6f7ec;
+  --success-border: #bfe8ce;
+  --lock: #17a558;
+  --lock-soft: rgba(23, 165, 88, .12);
+  --hint: #12c3ae;
+  --hint-soft: rgba(18, 195, 174, .12);
+
+  --warn: #d9820f;
+  --warn-strong: #b26a00;
+  --warn-tint: #fff3dd;
+  --warn-border: #f6dcaa;
+
+  --danger: #e05252;
+  --danger-strong: #c0392f;
+  --danger-tint: #fdeeee;
+  --danger-border: #f5cfcf;
+
+  /* listening & writing states */
+  --lw-success: #17a558;
+  --lw-danger: #e05252;
+
+  /* hero decorative circles */
+  --hero-deco-1: rgba(255, 255, 255, .28);
+  --hero-deco-2: rgba(255, 255, 255, .16);
+
+  /* accent tones for stat & section icons */
+  --accent-teal: #0da393;
+  --accent-pink: #7a7fd0;
+  --accent-gold: #e8951a;
+
+  --level-tint: #e9f7fd;
+  --toast-bg: #12354c;
+  --shadow-sm: 0 1px 2px rgba(12, 34, 51, .06);
+  --shadow-card: 0 10px 28px -12px rgba(10, 61, 92, .16), 0 2px 6px rgba(10, 61, 92, .05);
+  --shadow-float: 0 16px 40px -14px rgba(10, 61, 92, .28), 0 4px 12px rgba(10, 61, 92, .08);
+  --shadow: var(--shadow-float);
+  --shadow-primary: 0 8px 20px -6px rgba(13, 142, 207, .45);
+}
+
+/* ---------- dark theme ---------- */
+[data-theme="dark"] {
+  --bg: #0b1720;
+  --surface: #122331;
+  --surface-2: #1a3040;
+  --surface-blur: rgba(11, 23, 32, .88);
+  --border: #233c4e;
+  --border-strong: #34566d;
+  --text: #eaf3f8;
+  --muted: #92abb9;
+
+  --primary: #38b6e8;
+  --primary-strong: #6fcdf2;
+  --primary-deep: #0a3d5c;
+  --primary-soft: #1d5069;
+  --primary-tint: #123344;
+  --focus-ring: #38b6e8;
+  --turquoise: #2ad4c0;
+  --turquoise-strong: #6ee4d6;
+  --turquoise-tint: #0e3330;
+
+  --grad: linear-gradient(135deg, #1d8fc4 0%, #17a8ac 55%, #1fbfa9 100%);
+  --grad-soft: linear-gradient(135deg, rgba(56, 182, 232, .14), rgba(42, 212, 192, .14));
+  --grad-strong: linear-gradient(135deg, #1780b4 0%, #18988c 100%);
+  --header-grad: linear-gradient(180deg, #122331 0%, #0e1c28 100%);
+  --hero-grad: linear-gradient(140deg, #14506e 0%, #10617a 48%, #0f6d68 100%);
+  --nav-bg: rgba(17, 33, 45, .92);
+
+  --mint: #123344;
+  --blue-soft: #1d5069;
+  --blue-tint: #112c3b;
+  --pink-soft: #4a3418;
+  --pink-tint: #38290f;
+  --yellow-soft: #4a3d18;
+  --yellow-tint: #362d12;
+
+  --purple: #9ba0e0;
+  --purple-strong: #b8bcec;
+  --purple-tint: #232642;
+
+  --success: #43c97e;
+  --success-strong: #7bdcA2;
+  --success-tint: #14301f;
+  --success-border: #2c5a3c;
+  --lock: #43c97e;
+  --lock-soft: rgba(67, 201, 126, .16);
+  --hint: #2ad4c0;
+  --hint-soft: rgba(42, 212, 192, .16);
+
+  --warn: #f2a83b;
+  --warn-strong: #ffc46a;
+  --warn-tint: #36270e;
+  --warn-border: #5c4519;
+
+  --danger: #ef8b8b;
+  --danger-strong: #f4a9a9;
+  --danger-tint: #392222;
+  --danger-border: #663a3a;
+
+  --lw-success: #43c97e;
+  --lw-danger: #ef8b8b;
+
+  --hero-deco-1: rgba(255, 255, 255, .07);
+  --hero-deco-2: rgba(255, 255, 255, .04);
+
+  --accent-teal: #2ad4c0;
+  --accent-pink: #9ba0e0;
+  --accent-gold: #ffb32c;
+
+  --level-tint: #112c3b;
+  --toast-bg: #eaf3f8;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .45);
+  --shadow-card: 0 10px 28px -12px rgba(0, 0, 0, .5), 0 2px 6px rgba(0, 0, 0, .3);
+  --shadow-float: 0 16px 40px -14px rgba(0, 0, 0, .65), 0 4px 12px rgba(0, 0, 0, .4);
+  --shadow-primary: 0 8px 20px -6px rgba(20, 120, 165, .55);
+}
+
+/* system preference when theme = system */
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] {
+    --bg: #0b1720;
+    --surface: #122331;
+    --surface-2: #1a3040;
+    --surface-blur: rgba(11, 23, 32, .88);
+    --border: #233c4e;
+    --border-strong: #34566d;
+    --text: #eaf3f8;
+    --muted: #92abb9;
+
+    --primary: #38b6e8;
+    --primary-strong: #6fcdf2;
+    --primary-deep: #0a3d5c;
+    --primary-soft: #1d5069;
+    --primary-tint: #123344;
+    --focus-ring: #38b6e8;
+    --turquoise: #2ad4c0;
+    --turquoise-strong: #6ee4d6;
+    --turquoise-tint: #0e3330;
+
+    --grad: linear-gradient(135deg, #1d8fc4 0%, #17a8ac 55%, #1fbfa9 100%);
+    --grad-soft: linear-gradient(135deg, rgba(56, 182, 232, .14), rgba(42, 212, 192, .14));
+    --grad-strong: linear-gradient(135deg, #1780b4 0%, #18988c 100%);
+    --header-grad: linear-gradient(180deg, #122331 0%, #0e1c28 100%);
+    --hero-grad: linear-gradient(140deg, #14506e 0%, #10617a 48%, #0f6d68 100%);
+    --nav-bg: rgba(17, 33, 45, .92);
+
+    --mint: #123344;
+    --blue-soft: #1d5069;
+    --blue-tint: #112c3b;
+    --pink-soft: #4a3418;
+    --pink-tint: #38290f;
+    --yellow-soft: #4a3d18;
+    --yellow-tint: #362d12;
+
+    --purple: #9ba0e0;
+    --purple-strong: #b8bcec;
+    --purple-tint: #232642;
+
+    --success: #43c97e;
+    --success-strong: #7bdcA2;
+    --success-tint: #14301f;
+    --success-border: #2c5a3c;
+    --lock: #43c97e;
+    --lock-soft: rgba(67, 201, 126, .16);
+    --hint: #2ad4c0;
+    --hint-soft: rgba(42, 212, 192, .16);
+
+    --warn: #f2a83b;
+    --warn-strong: #ffc46a;
+    --warn-tint: #36270e;
+    --warn-border: #5c4519;
+
+    --danger: #ef8b8b;
+    --danger-strong: #f4a9a9;
+    --danger-tint: #392222;
+    --danger-border: #663a3a;
+
+    --lw-success: #43c97e;
+    --lw-danger: #ef8b8b;
+
+    --hero-deco-1: rgba(255, 255, 255, .07);
+    --hero-deco-2: rgba(255, 255, 255, .04);
+
+    --accent-teal: #2ad4c0;
+    --accent-pink: #9ba0e0;
+    --accent-gold: #ffb32c;
+
+    --level-tint: #112c3b;
+    --toast-bg: #eaf3f8;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .45);
+    --shadow-card: 0 10px 28px -12px rgba(0, 0, 0, .5), 0 2px 6px rgba(0, 0, 0, .3);
+    --shadow-float: 0 16px 40px -14px rgba(0, 0, 0, .65), 0 4px 12px rgba(0, 0, 0, .4);
+    --shadow-primary: 0 8px 20px -6px rgba(20, 120, 165, .55);
+  }
+}
