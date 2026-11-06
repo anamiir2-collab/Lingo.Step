@@ -1,0 +1,26 @@
+{
+  "appId": "com.anamiir2collab.lingostep",
+  "appName": "LingoStep",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0d8ecf"
+  },
+  "ios": {
+    "contentInset": "always",
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "backgroundColor": "#f2f8fb",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#0d8ecf"
+    },
+    "TextToSpeech": {
+      "speechRate": 1.0
+    }
+  }
+}
