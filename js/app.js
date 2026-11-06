@@ -1237,7 +1237,7 @@ async function viewMore(view, page = null) {
     moreLink('headphones', 'listeningPractice', 'listeningPracticeDesc', '#/dialogues'),
     moreLink('audio', 'pronunciationPractice', 'pronunciationPracticeDesc', '#/audio'),
     moreLink('book', 'vocabularyPractice', 'vocabularyPracticeDesc', '#/vocabulary'),
-  ], true);
+  ], true, 'learning');
 
   /* ---------- category 2: My Progress ---------- */
   const progressCat = moreCategory('moreCatProgress', 'chart', [
@@ -1247,7 +1247,7 @@ async function viewMore(view, page = null) {
     moreLink('flame', 'dailyStreakRow', 'dailyStreakDesc', '#/stats'),
     moreLink('sparkle', 'xpPoints', 'xpPointsDesc', '#/profile'),
     moreLink('clock', 'learningHistory', 'learningHistoryDesc', '#/history'),
-  ]);
+  ], false, 'progress');
 
   /* ---------- category 3: Application Settings ---------- */
   const settingsCat = moreCategory('moreCatSettings', 'settings', [
@@ -1259,7 +1259,7 @@ async function viewMore(view, page = null) {
     moreCtl('theme', 'fontSize', fontScaleSel),
     moreCtl('package', 'offlineContent', offlineBtn, 'offlineContentDesc'),
     moreCtl('review', 'backupSection', el('div', { class: 'row' }, [exportBtn, importBtn, importInput])),
-  ]);
+  ], false, 'settings');
 
   /* ---------- learning preferences (existing, real) ---------- */
   const prefsCat = moreCategory('moreGroupLearning', 'bulb', [
@@ -1267,14 +1267,14 @@ async function viewMore(view, page = null) {
     moreCtl('language', 'showArabic', arabicToggle),
     moreCtl('pen', 'strictGrading', strictToggle),
     moreCtl('volumeX', 'soundEffects', soundFxToggle),
-  ]);
+  ], false, 'preferences');
 
   /* ---------- category 4: Help & Information ---------- */
   const helpCat = moreCategory('moreCatHelp', 'info', [
     moreLink('info', 'howToUse', 'howToUseDesc', '#/help'),
     moreLink('helpCircle', 'faqTitle', 'faqDesc', '#/faq'),
     moreLink('user', 'profileTitle', 'moreGroupProfile', '#/profile'),
-  ]);
+  ], false, 'help');
 
   const aboutCard = el('div', { class: 'card more-about' }, [
     el('p', { class: 'small muted more-note', text: t(L, 'aboutText') }),
