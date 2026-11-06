@@ -4,7 +4,7 @@ A complete English learning app built for Arabic speakers — structured lessons
 
 <p align="left">
   <img src="https://img.shields.io/badge/version-10.0.0-blue" alt="Version 10.0.0">
-  <img src="https://img.shields.io/badge/levels-A1%20%E2%86%92%20C1- turquoise" alt="CEFR levels A1 to C1">
+  <img src="https://img.shields.io/badge/levels-A1%20%E2%86%92%20C1-turquoise" alt="CEFR levels A1 to C1">
   <img src="https://img.shields.io/badge/lessons-252-green" alt="252 lessons">
   <img src="https://img.shields.io/badge/sentences-14%2C000%2B-orange" alt="14,000+ sentences">
   <img src="https://img.shields.io/badge/platform-Android%20first-brightgreen" alt="Android first">
