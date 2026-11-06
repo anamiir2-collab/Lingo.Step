@@ -1,38 +1,383 @@
-# LingoStep
+# 📱 LingoStep
 
-LingoStep is a complete English learning app for Arabic speakers: structured lessons organized by level, interactive exercises of all kinds, clear Arabic explanations for every word and sentence, listening and pronunciation practice with real everyday phrases, progress tracking, and a premium mobile-first design built for Android phones first.
+A complete English learning app built for Arabic speakers — structured lessons, interactive exercises, clear Arabic explanations, and a premium mobile-first experience designed for Android phones first.
 
-**v10.0.0 — premium mobile redesign (same engine, same content, better app):**
+<p align="left">
+  <img src="https://img.shields.io/badge/version-10.0.0-blue" alt="Version 10.0.0">
+  <img src="https://img.shields.io/badge/levels-A1%20%E2%86%92%20C1- turquoise" alt="CEFR levels A1 to C1">
+  <img src="https://img.shields.io/badge/lessons-252-green" alt="252 lessons">
+  <img src="https://img.shields.io/badge/sentences-14%2C000%2B-orange" alt="14,000+ sentences">
+  <img src="https://img.shields.io/badge/platform-Android%20first-brightgreen" alt="Android first">
+  <img src="https://img.shields.io/badge/license-see%20LICENSE-lightgrey" alt="License">
+</p>
 
-- **Mobile-first premium interface** — deep-blue → turquoise brand, clean white surfaces, soft gradients, rounded cards, subtle shadows and consistent spacing. Every screen is designed for one-handed phone use (no desktop layout squeezed onto a phone).
-- **Home screen that matters** — welcome greeting, daily streak, XP and current level up front, today's plan with a goal ring, a Daily challenge built from your real progress, quick access to Dialogues / Vocabulary / Revision / Achievements, and your learning paths.
-- **Floating bottom navigation** — Home · Sections · Vocabulary · Progress · More, all reachable with a thumb; the tab bar steps aside during focused practice.
-- **Keyboard-free exercises** — letter tiles, word chips and option cards only; the system keyboard can never appear during a lesson.
-- **Smart first-letter hints** — the Hint button reveals only the first letter of the current incomplete word (in turquoise). Repeated presses never reveal the whole word, and never show the Arabic meaning or the answer.
-- **Word-by-word locking** — a correctly completed word turns green and is locked for the whole attempt: it cannot be deleted, edited, replaced or moved. Incorrect words never lock.
-- **No accidental erasing** — there is no clear-all button at all; backspace only ever touches the current word.
-- **Restart needs confirmation** — restarting an exercise shows an explicit dialog; saved lesson progress is never lost.
-- **Skipping requires an answer** — a skipped question earns no points and a different question from the same lesson must be answered before continuing.
-- **Fast and light** — a slim 4-file CSS system (tokens → base → practice → dialogues), lazy lesson loading, service-worker offline cache.
+---
 
-- 252 lessons across 11 sections (A1 → C1), 14,000+ practice sentences — every exercise, answer and achievement preserved
-- Progress, streaks and XP stored locally (IndexedDB) with v2 backup/restore
-- Full Arabic RTL and English LTR support with a light/dark/system theme
+## 📖 Table of Contents
 
-## Run, test, validate
+- [Overview](#-overview)
+- [What's New in v10.0.0](#-whats-new-in-v1000)
+- [Feature Breakdown](#-feature-breakdown)
+- [Content at a Glance](#-content-at-a-glance)
+- [Tech Stack](#️-tech-stack)
+- [Getting Started](#-getting-started)
+- [Available Scripts](#-available-scripts)
+- [Install on Android](#-install-on-android)
+- [Project Structure](#-project-structure)
+- [Data & Storage](#-data--storage)
+- [Theming & Internationalization](#-theming--internationalization)
+- [Testing & Validation](#-testing--validation)
+- [Building for Production](#️-building-for-production)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 🌍 Overview
+
+LingoStep is a full-featured English learning application designed specifically for Arabic speakers. It combines the structure of a formal language course with the engagement of a modern mobile app, giving learners a clear path from beginner to advanced while keeping explanations accessible in their native language.
+
+The application is mobile-first and optimized for comfortable one-handed phone use. It runs as a Progressive Web App (PWA) and supports Android packaging through the project's CI workflow.
+
+### Core pillars
+
+- 📚 Structured lessons organized by CEFR level (A1 → C1).
+- 🎯 Interactive exercises with a consistent answer experience.
+- 🗣️ Clear Arabic explanations for words and sentences.
+- 🎧 Listening and pronunciation practice using everyday phrases.
+- 📊 Progress tracking with streaks, XP, and achievements stored locally.
+- 📱 Responsive mobile-first design, with Android phones as the primary target.
+
+---
+
+## 🆕 What's New in v10.0.0
+
+**Premium mobile redesign — same learning engine, same content, improved experience.**
+
+Version 10 focuses on improving the interface and interaction experience while preserving the existing lesson content, exercises, answers, progress system, and achievements.
+
+### 🎨 Mobile-first premium interface
+
+- Deep-blue and turquoise brand identity with elegant gold-accented card borders.
+- Clean surfaces, rounded cards, subtle shadows, and consistent spacing.
+- Improved card layouts, typography, icons, and touch targets.
+- Responsive layouts designed for phone screens rather than desktop layouts squeezed onto mobile.
+
+### 🏠 Improved home screen
+
+- Welcome greeting, daily streak, XP, and current level.
+- Today's learning plan and goal progress.
+- Daily challenge based on learner progress.
+- Quick access to Dialogues, Vocabulary, Revision, and Achievements.
+- Clear access to learning paths.
+
+### 🧭 Floating bottom navigation
+
+Home · Sections · Vocabulary · Progress · More.
+
+The navigation is positioned for convenient thumb access and steps aside during focused practice when appropriate.
+
+### ⌨️ Native mobile keyboard
+
+- The custom colored letter bank is replaced by the device's normal system keyboard in typing exercises.
+- Tapping the answer area opens the native phone keyboard.
+- Existing answer slots, checking logic, and word-building behavior are preserved.
+- Correctly completed words remain locked and cannot be deleted.
+- Backspace only affects unfinished input.
+
+### 💡 Smart first-letter hints
+
+- The Hint button reveals only the first letter of the current incomplete word.
+- The hint is visually distinguished from the remaining answer.
+- It does not reveal the full Arabic sentence or give away the complete answer.
+
+### 🔒 Word-by-word locking
+
+- A correctly completed word becomes locked for the current attempt.
+- Locked words cannot be deleted, edited, replaced, or moved.
+- Incorrect and incomplete words remain editable.
+
+### 🛡️ Protection against accidental mistakes
+
+- No clear-all action that can erase completed words.
+- Backspace only affects the active, unfinished answer.
+- Restart requires confirmation.
+- Skipping does not bypass the learning requirement: the learner must answer a question before continuing, according to the exercise rules.
+
+### 🎧 Compact audio controls
+
+- Related audio actions are grouped in one compact card.
+- Controls are arranged horizontally where screen width allows.
+- Buttons remain touch-friendly and adapt to narrow screens.
+- Existing playback and speed controls are preserved.
+
+### 🗂️ Dedicated More pages
+
+- More is organized as a navigation hub with clear category cards.
+- Categories open dedicated full pages instead of expanding accordion/dropdown panels.
+- Unnecessary arrows are removed from category entries.
+- Each subpage provides a clear way back to More.
+- Existing settings and actions remain available.
+
+### ⚡ Fast and lightweight
+
+- Four-file CSS system (tokens → base → practice → dialogues).
+- Lazy lesson loading.
+- Service-worker offline cache.
+
+### 🌍 Full bilingual support
+
+- Arabic RTL and English LTR layouts.
+- Light, dark, and system theme options.
+
+---
+
+## ✨ Feature Breakdown
+
+### Learning experience
+
+| Feature | Description |
+|---|---|
+| Level-based structure | 11 sections spanning A1 to C1 |
+| 252 lessons | Vocabulary, sentences, and practical usage |
+| 14,000+ practice sentences | Varied exercises for continued practice |
+| Arabic explanations | Explanations for words and sentences |
+| Everyday phrases | Listening and pronunciation practice |
+| Daily Challenge | A challenge connected to learning progress |
+
+### Interaction design
+
+| Feature | Description |
+|---|---|
+| Native keyboard input | Uses the phone's system keyboard for typing exercises |
+| First-letter hints | Progressive hints without revealing the full answer |
+| Word locking | Correctly completed words remain locked |
+| Safe backspace | Deletion does not affect completed words |
+| Confirmed restart | Helps prevent accidental restarts |
+| Answer-gated skipping | Skipping cannot be used to bypass required answers |
+
+### Progress & motivation
+
+| Feature | Description |
+|---|---|
+| XP system | Earn experience points through exercises |
+| Daily streaks | Track consecutive learning days |
+| Achievements | Unlock badges as you progress |
+| Goal progress | Visualize daily learning completion |
+| Local persistence | Keep progress on the learner's device |
+
+### Platform & performance
+
+| Feature | Description |
+|---|---|
+| PWA support | Installable from a supported browser |
+| Android packaging | APK build supported through CI |
+| Lazy loading | Lessons load when needed |
+| Service worker | Offline caching for repeat visits |
+| Lightweight CSS | Four-file CSS system |
+
+---
+
+## 📦 Content at a Glance
+
+| Item | Count |
+|---|---:|
+| Lessons | 252 |
+| Sections | 11 |
+| CEFR levels | A1 → C1 |
+| Practice sentences | 14,000+ |
+| CSS files | 4 |
+| Test suites | 17 |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Vanilla HTML, CSS, and JavaScript.
+- **Styling:** Custom four-file CSS system (tokens → base → practice → dialogues).
+- **Storage:** IndexedDB for progress, streaks, XP, and backups.
+- **Offline:** Service Worker (`sw.js`).
+- **Packaging:** Capacitor for Android APK builds through CI.
+- **PWA:** Web app manifest for installability.
+- **Testing:** Test suites and validation scripts.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (LTS recommended).
+- npm.
+
+### Installation
 
 ```bash
-npm start              # dev server on http://localhost:8080
-npm test               # 17 test suites
-npm run validate       # project structure + lessons + duplicates
-npm run validate:lessons
-npm run build          # web bundle into www/ (for Capacitor)
+# Clone the repository
+git clone https://github.com/anamiir2-collab/Lingo.Step.git
+cd Lingo.Step
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
 ```
 
-## Install on an Android phone
+The development server runs at [http://localhost:8080](http://localhost:8080).
 
-**Option 1 — APK:** download `LingoStep-v10.0.0-debug.apk` from the GitHub Actions artifacts of the **Android APK** workflow (or a GitHub Release), then open it on the phone (allow *Install unknown apps* for your browser or file manager). The APK is built on CI from a **temporarily generated** Android project — no Android/Gradle/Kotlin/Java files are committed to this repository.
+---
 
-**Option 2 — PWA:** open the site in Chrome and use *Install app* (*Add to Home screen*). Works offline after the lessons load once.
+## 📜 Available Scripts
 
-See `docs/ANDROID-APK.md` for local build instructions.
+| Command | Description |
+|---|---|
+| `npm start` | Start the development server on port 8080 |
+| `npm test` | Run the test suites |
+| `npm run validate` | Validate project structure, lessons, and duplicates |
+| `npm run validate:lessons` | Validate lesson content |
+| `npm run build` | Build the web bundle into `www/` for Capacitor |
+
+---
+
+## 📲 Install on Android
+
+### Option 1 — Android APK
+
+1. Open the repository's **Actions** tab.
+2. Select a successful run of the Android APK workflow.
+3. Download the APK artifact, if that workflow run provides one, or use an available GitHub Release.
+4. Open the APK on your Android phone.
+5. If prompted, allow installation from your browser or file manager.
+
+The Android project may be generated during CI. Check the workflow and [docs/ANDROID-APK.md](docs/ANDROID-APK.md) for the current build process. Do not assume an APK artifact or release exists until it is published.
+
+### Option 2 — Install as a PWA
+
+1. Open the deployed application in Chrome on Android.
+2. Choose **Install app** or **Add to Home screen**.
+3. Launch LingoStep from the home screen.
+
+Offline availability depends on the service-worker cache and which content has already been loaded.
+
+---
+
+## 🗂️ Project Structure
+
+```text
+Lingo.Step/
+├── .github/workflows/    # CI workflows
+├── assets/               # Static assets
+├── css/                  # Application styles
+├── data/                 # Application data
+├── dialogues/            # Dialogue content
+├── docs/                 # Project documentation
+├── icons/                # App icons
+├── js/                   # Application logic
+├── lessons/              # Lesson files
+├── scripts/              # Helper scripts
+├── tests/                # Test suites
+├── index.html            # Application entry point
+├── manifest.json         # PWA manifest
+├── sw.js                 # Service worker
+├── capacitor.config.json # Capacitor configuration
+├── package.json
+├── package-lock.json
+├── README.md
+└── LICENSE
+```
+
+---
+
+## 💾 Data & Storage
+
+LingoStep stores learner data locally on the device.
+
+- IndexedDB is used for learning progress and related learner data.
+- Backup and restore tools allow learners to export and re-import supported data.
+- No account is required for the core local learning experience.
+- Offline use depends on previously cached application resources and lesson content.
+
+---
+
+## 🎨 Theming & Internationalization
+
+| Feature | Support |
+|---|---|
+| Arabic RTL | Right-to-left layout |
+| English LTR | Left-to-right layout |
+| Light theme | Bright, clean surfaces |
+| Dark theme | Comfortable low-light appearance |
+| System theme | Follows the device preference |
+| Brand identity | Deep blue, turquoise, and refined gold accents |
+
+---
+
+## 🧪 Testing & Validation
+
+Run the project's checks before submitting changes:
+
+```bash
+npm test
+npm run validate
+npm run validate:lessons
+```
+
+Validation tooling is intended to check:
+
+- Project structure integrity.
+- Lesson content.
+- Duplicate lesson or sentence content.
+
+Always review the command output and resolve failures before merging changes.
+
+---
+
+## 🏗️ Building for Production
+
+### Web build
+
+```bash
+npm run build
+```
+
+The build output is written to `www/` for the configured Capacitor workflow.
+
+### Android APK
+
+The repository can use its Android APK CI workflow to package the web application. Refer to the current workflow configuration and [docs/ANDROID-APK.md](docs/ANDROID-APK.md) for the exact build requirements.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository.
+2. Create a branch for your feature or fix.
+3. Keep changes consistent with the existing architecture and mobile-first design.
+4. Preserve existing lessons, exercises, learner progress, and application behavior.
+5. Run the validators and tests:
+
+   ```bash
+   npm run validate
+   npm test
+   ```
+
+6. Open a pull request with a clear description of the changes.
+
+---
+
+## 📄 License
+
+See the [LICENSE](LICENSE) file for usage terms.
+
+---
+
+<div align="center">
+
+Built with ❤️ for Arabic-speaking English learners.
+
+⭐ If you find LingoStep useful, consider starring the repository!
+
+</div>
