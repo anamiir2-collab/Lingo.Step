@@ -1068,7 +1068,7 @@ function moreCtl(iconName, labelKey, control, descKey) {
 /* Each More category opens as a dedicated full page. */
 function moreCategory(labelKey, iconName, rows, open = false, slug = '') {
   const L = currentLang;
-  const active = new URLSearchParams(location.hash.split('?')[1] || '').get('page') === slug;
+  const active = location.hash.replace(/^#\\/more-page\\//, '').split('?')[0] === slug;
   const card = el('section', { class: 'card more-section more-cat' }, [
     el('a', { class: 'more-section-summary more-page-link', href: active ? '#/more' : `#/more-page/${slug}` }, [
       el('span', { class: 'more-section-heading' }, [icon(iconName), el('span', { text: t(L, labelKey) })]),
