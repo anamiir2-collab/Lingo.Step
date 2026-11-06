@@ -34,7 +34,7 @@ import { recordAttempt, updateLessonState, saveResume, getLessonState } from './
 import { upsertOnWrong, gradeReview } from './review.js';
 import { navigate } from './router.js';
 import { getManifestEntry, nextLessonInSection, loadLesson } from './lesson-loader.js';
-import { createTouchTypingField, createLetterTiles } from './touch-typing.js';
+import { createTouchTypingField, createNativeBlankField } from './touch-typing.js';
 import { createWordOrderSession, pickAlternativeQuestion } from './exercise-state.js';
 import { excludedOption } from './hints.js';
 import { awardExercise, awardLessonComplete, markFirstAttemptFailed, getTotalXp } from './xp.js';
@@ -449,16 +449,16 @@ export async function renderLessonPlayer(container, lessonId, opts = {}) {
       card.append(el('div', { class: 'prompt-label', text: t(L, 'fillPrompt') }));
       card.append(el('div', { class: 'blank-display', dir: 'ltr', html: trustedBlankHtml(ex.display) }));
       if (settings.showArabic && ex.ar) card.append(el('div', { class: 'sentence-ar', dir: 'rtl', text: ex.ar }));
-      // v9 KEYBOARD-FREE fill-blank: letter tiles of the blank word
-      // (words for multi-word blanks). Same question, same accepted
-      // answers, same checkAnswer validation — zero typing. No
-      // clear-all button; the answer locks only when correct.
-      const tiles = createLetterTiles({
-        source: ex.blankWord,
+      // v10 NATIVE-KEYBOARD fill-blank: tapping the answer slots opens
+      // the phone's own keyboard (invisible input overlay). Same
+      // question, same accepted answers, same checkAnswer validation,
+      // same word-by-word locking, same smart hints — zero custom
+      // letter tiles. No clear-all; the answer locks only when correct.
+      const tiles = createNativeBlankField({
+        expected: ex.blankWord,
         ariaLabel: t(L, 'fillPrompt'),
-        labels: { backspace: t(L, 'kbBackspace') },
         onComplete: () => {
-          // all tiles placed → validate immediately (word-level)
+          // word fully typed → validate immediately (word-level)
           const at = idx;
           window.setTimeout(() => {
             if (!checked && idx === at) onCheck();
@@ -471,7 +471,6 @@ export async function renderLessonPlayer(container, lessonId, opts = {}) {
       card.append(actions);
       state.tiles = tiles;
       state.hintTarget = 'blank';
-      state.blankHint = { revealed: 0 }; // letters revealed for THIS attempt
     }
 
     if (ex.type === 'word-order') {
@@ -715,25 +714,15 @@ export async function renderLessonPlayer(container, lessonId, opts = {}) {
       return;
     }
 
-    if (target === 'blank' && ex.type === 'fill-blank') {
-      const blank = String(ex.blankWord ?? '').trim();
-      const letters = Array.from(blank);
-      const cap = Math.max(1, Math.floor(letters.length / 2));
-      const revealed = state.blankHint?.revealed || 0;
-      if (letters.length < 2) { hintChipMsg(t(L, 'hintTooShort')); return; }
-      if (revealed >= cap) { hintChipMsg(t(L, 'hintNoMore')); return; }
-      state.blankHint.revealed = revealed + 1;
-      // reveal the NEXT letter (first press → first letter), styled
-      // in the hint color inside the clue chip: e.g. d _ _ _ _
-      const shown = letters.slice(0, state.blankHint.revealed)
-        .map((c, i) => (i === 0 ? c : c)).join('');
-      const rest = '_'.repeat(Math.max(0, letters.length - state.blankHint.revealed));
-      const chip = el('div', { class: 'hint-box hint-box-sm hint-letters', dir: 'ltr' }, [
-        icon('bulb'),
-        el('span', { class: 'hint-revealed-letter', text: shown }),
-        el('span', { class: 'hint-hidden-rest', text: rest }),
-      ]);
-      state.hintChip.replaceChildren(chip);
+    if (target === 'blank' && ex.type === 'fill-blank' && state.tiles?.revealHint) {
+      // v10: same smart hint as dictation — reveal the next hidden
+      // letter of the active word in the hint color (capped at half,
+      // never the whole word, never the Arabic meaning).
+      const res = state.tiles.revealHint();
+      if (res.revealed) hintChipMsg(t(L, 'hintRevealed'));
+      else if (res.reason === 'cap-reached') hintChipMsg(t(L, 'hintNoMore'));
+      else if (res.reason === 'word-too-short') hintChipMsg(t(L, 'hintTooShort'));
+      else hintChipMsg(t(L, 'hintNoneLeft'));
       return;
     }
 

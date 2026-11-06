@@ -14,7 +14,7 @@ import { getSettings } from './settings.js';
 import { getManifest } from './lesson-loader.js';
 import { loadLesson } from './lesson-loader.js';
 import { buildPlacementPlan, pickExerciseFromLesson, isAnswerCorrect, estimateLevel, recommendedLessons, isValidPlacementResult } from './placement.js';
-import { createLetterTiles } from './touch-typing.js';
+import { createNativeBlankField } from './touch-typing.js';
 
 const K_RESULT = 'placementResult';
 
@@ -234,10 +234,11 @@ export async function renderPlacementView(view) {
         bodyBox.append(optsBox);
       } else if (exercise.type === 'fill-blank') {
         bodyBox.append(el('div', { class: 'blank-display', dir: 'ltr', text: exercise.display }));
-        // v8: keyboard-free letter tiles — same question, same validation
-        const tiles = createLetterTiles({
-          source: exercise.blankWord,
+        // v10: native phone keyboard — same question, same validation
+        const tiles = createNativeBlankField({
+          expected: exercise.blankWord,
           ariaLabel: T('fillPrompt'),
+          onComplete: () => submit(),
         });
         const checkBtn = el('button', { class: 'btn btn-primary', text: T('checkAnswer') });
         const row = el('div', { class: 'answer-row' }, [tiles.root, checkBtn]);

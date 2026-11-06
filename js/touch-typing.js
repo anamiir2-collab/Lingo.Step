@@ -1,43 +1,39 @@
 /* ============================================================
-   LingoStep — touch-typing.js  (v9 keyboard-free answer surfaces)
-   100% keyboard-free answer surfaces for lessons, placement test
-   and dialogue practice. NO real <input> element is ever created,
-   so the Android/iOS system keyboard can NEVER appear during a
-   learning activity.
+   LingoStep — touch-typing.js  (v10 native keyboard answers)
+   Answer surfaces for lessons, placement test and dialogue
+   practice are driven by the NATIVE phone keyboard. There are no
+   custom letter banks or QWERTY pads anywhere: an invisible
+   <input> overlays the answer slots, so tapping the answer area
+   opens the Android/iPhone system keyboard exactly like typing in
+   any other app.
 
-   v9 BREAKING CHANGE — the built-in QWERTY touch pad is GONE.
-   The old tt-keyboard (26-key layout + space + ⌫) was removed
-   completely; there is no typing keyboard anywhere in the
-   learning experience. Answers are built by TOUCH only:
+   Shared core — createNativeSessionField(opts):
+   - Letter slots grouped by word (letter-track helpers define the
+     word grouping and punctuation policy).
+   - Keystrokes go through the word state machine (exercise-state)
+     with the SAME prefix policy as the original typing pipeline:
+     wrong letters are rejected (shake + buzz), punctuation is
+     printed in place and never has to be typed.
+   - Words LOCK word-by-word: a completed word turns green and is
+     frozen (cannot be deleted, edited or replaced). The space
+     after it is inserted automatically.
+   - Backspace only ever removes the last letter of the ACTIVE
+     word — locked words are untouchable. There is NO clear-all.
+   - Smart hints: revealHint() reveals the next hidden letter of
+     the active word (capped at half the word, never the whole
+     word, never the Arabic meaning) and styles it in the hint
+     color.
+   - Physical keyboards still work on desktop through a
+     document-level keydown listener.
 
    1) createTouchTypingField({ expected, ... })
       Dictation surface for listen-and-type / dialogue practice.
-      - Letter slots grouped by word (same word-grouped track and
-        punctuation policy as before — letter-track helpers).
-      - The ACTIVE word is completed with letter TILES: the letters
-        of the current word plus a few decoy letters, shuffled.
-        Wrong letters are rejected (shake + buzz) — the same
-        prefix policy as the original typing pipeline.
-      - Words LOCK word-by-word: a completed word turns green and
-        is frozen (cannot be deleted, edited or replaced). The
-        space after it is inserted automatically.
-      - Backspace (single ⌫ button) only ever removes the last
-        letter of the ACTIVE word — locked words are untouchable.
-        There is NO clear-all button anywhere.
-      - Smart hints: revealHint() reveals the next hidden letter
-        of the active word (capped at half the word, never the
-        whole word) and styles it in the hint color.
-      - Physical keyboards still work on desktop through a
-        document-level keydown listener (no input to focus).
+      Completing the sentence fires onComplete() once.
 
-   2) createLetterTiles({ source, ... })
-      Word/letter tile builder for fill-blank answers (original
-      question + acceptedAnswers validation untouched): tiles of
-      the blank word (or words for multi-word blanks), shuffled;
-      tap to place, tap a placed tile to remove it, ⌫ removes the
-      last one. The clear-all button was REMOVED. When the answer
-      is validated correct, lockCorrect() freezes the placed tiles
-      green; markIncorrect() shows the red state (never locks).
+   2) createNativeBlankField({ expected, ... })
+      Fill-blank surface: same slots, same session logic, plus
+      lockCorrect() / markIncorrect() so the engine can freeze the
+      answer green after checkAnswer() confirms it.
 
    Pure logic helpers (validateKeystroke / buildTiles) are DOM-free
    and Node-testable; the word state machine lives in
@@ -143,6 +139,7 @@ export function backspaceBuffer(buffer) {
  * Shuffle is deterministic-safe: short answers never render in
  * the exact expected order (that would give the answer away).
  * Returns array of string tiles.
+ * (Pure helper — kept for the validation-parity test suite.)
  */
 export function buildTiles(source, random = Math.random) {
   const src = String(source ?? '').trim();
@@ -178,63 +175,34 @@ export function requiredKeyChars(expected) {
   return need;
 }
 
-/* ---------- letter tiles for the active word ---------- */
-
-const DECOY_POOL = 'aeeiiooustnrlhcdmupgbfkwvyzxj';
-
-/**
- * Build the tile bank for the active word: every required letter
- * (one tile per letter) plus a handful of decoys, shuffled.
- */
-export function buildWordTiles(word, { extra = 6, random = Math.random } = {}) {
-  const req = Array.from(String(word ?? ''));
-  const decoyCount = Math.min(10, Math.max(4, Math.round(req.length * 0.8))) + (extra ?? 0);
-  const pool = DECOY_POOL.split('');
-  const decoys = [];
-  for (let i = 0; i < decoyCount; i += 1) {
-    decoys.push(pool[Math.floor(random() * pool.length)]);
-  }
-  const all = [...req, ...decoys];
-  for (let i = all.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(random() * (i + 1));
-    [all[i], all[j]] = [all[j], all[i]];
-  }
-  return all;
-}
-
 /* ============================================================
-   1) Touch typing field (dictation, tile-driven, word locking)
+   Shared native-keyboard session field
    ============================================================ */
 
 /**
- * Create a keyboard-free dictation field.
+ * Core builder shared by the dictation and fill-blank surfaces.
  * opts: {
- *   expected:      String  — the full expected sentence (unchanged content)
+ *   expected:      String  — the full expected text (unchanged content)
  *   ariaLabel:     String
+ *   rootClass:     String  — class for the outer wrapper
  *   onChanged:     (value) => void
  *   onWrong:       () => void          (rejected letter)
  *   onWordLocked:  (index) => void     (a word just locked green)
- *   onComplete:    () => void          (sentence fully entered; fires once)
+ *   onComplete:    () => void          (text fully entered; fires once)
  *   onEnter:       () => void          (desktop Enter convenience)
- *   labels:        { backspace }       (space is automatic between words)
- *   tilesAria:     String
  * }
- * Returns { root, surface, getValue, isComplete, shake, render,
- *           revealHint, removeLast, setValue, destroy }.
+ * Returns the internal handles used by both public factories.
  */
-export function createTouchTypingField(opts = {}) {
+function createNativeSessionField(opts = {}) {
   const expected = String(opts.expected ?? '');
-  const labels = opts.labels || {};
   const session = createWordSession({ sentence: expected });
   const segments = splitSegments(expected);
   const targetChars = Array.from(expected);
 
   let completed = false;
   let destroyed = false;
-  // consumed tile elements for the current word (stack for ⌫)
-  let consumedTiles = [];
 
-  /* ----- letter slots surface (no input element) ----- */
+  /* ----- letter slots surface (no visible input element) ----- */
   const surface = el('div', { class: 'lw-typing-surface is-touch', dir: 'ltr' });
   const track = el('div', { class: 'lw-letter-track', 'aria-hidden': 'true' });
   surface.append(track);
@@ -284,14 +252,15 @@ export function createTouchTypingField(opts = {}) {
     surface.classList.toggle('is-complete', completed);
   }
 
-  /* ----- native phone keyboard input (no in-app letter pad) ----- */
+  /* ----- native phone keyboard (invisible input overlay) ----- */
   const nativeInput = el('input', {
     class: 'lw-native-input', type: 'text', inputmode: 'text',
     autocomplete: 'off', autocapitalize: 'none', autocorrect: 'off',
-    spellcheck: 'false', 'aria-label': opts.ariaLabel || 'Type the sentence',
+    spellcheck: 'false', 'aria-label': opts.ariaLabel || 'Type the answer',
   });
   nativeInput.setAttribute('enterkeyhint', 'done');
   surface.append(nativeInput);
+
   nativeInput.addEventListener('beforeinput', (e) => {
     if (destroyed || completed) { e.preventDefault(); return; }
     if (e.inputType === 'deleteContentBackward') {
@@ -300,7 +269,7 @@ export function createTouchTypingField(opts = {}) {
     if (e.inputType === 'insertText' && e.data) {
       e.preventDefault();
       for (const ch of Array.from(e.data)) {
-        if (/^[a-z]$/i.test(ch) || ch === "'" || ch === '-') placeTile(ch.toLowerCase());
+        if (/^[a-z]$/i.test(ch) || ch === "'" || ch === '-') placeLetter(ch.toLowerCase());
       }
     }
   });
@@ -310,16 +279,12 @@ export function createTouchTypingField(opts = {}) {
   surface.addEventListener('pointerdown', () => {
     if (!completed && !destroyed) nativeInput.focus({ preventScroll: true });
   });
-  function renderTiles() { /* the system keyboard replaces the old tile bank */ }
-  function consumeTile() {}
-  function unconsumeLast() {}
 
-  function placeTile(ch, btn) {
+  function placeLetter(ch) {
     if (destroyed || completed) return;
     const res = session.placeLetter(String(ch).toLowerCase());
     if (res.accepted) {
       soundCorrect();
-      consumeTile(String(ch).toLowerCase(), btn);
       renderSlots();
       if (typeof opts.onChanged === 'function') opts.onChanged(session.getValue());
       if (res.wordLocked) {
@@ -328,12 +293,9 @@ export function createTouchTypingField(opts = {}) {
         if (res.sessionComplete) {
           completed = true;
           renderSlots();
-          renderTiles();
           soundComplete();
           if (typeof opts.onComplete === 'function') opts.onComplete();
-          return;
         }
-        renderTiles();
       }
     } else {
       soundWrong();
@@ -348,7 +310,6 @@ export function createTouchTypingField(opts = {}) {
     const r = session.removeLastLetter();
     if (!r.removed) { shake(); return; }
     soundErase();
-    unconsumeLast();
     renderSlots();
     if (typeof opts.onChanged === 'function') opts.onChanged(session.getValue());
   }
@@ -361,7 +322,6 @@ export function createTouchTypingField(opts = {}) {
     if (destroyed || completed) return { revealed: false, reason: 'complete' };
     const res = session.revealFirstLetter();
     if (res.revealed) {
-      consumeTile(res.letter);
       renderSlots();
       if (res.wordLocked) {
         soundLock();
@@ -369,11 +329,8 @@ export function createTouchTypingField(opts = {}) {
         if (res.sessionComplete) {
           completed = true;
           renderSlots();
-          renderTiles();
           soundComplete();
           if (typeof opts.onComplete === 'function') opts.onComplete();
-        } else {
-          renderTiles();
         }
       }
       if (typeof opts.onChanged === 'function') opts.onChanged(session.getValue());
@@ -397,42 +354,39 @@ export function createTouchTypingField(opts = {}) {
       return;
     }
     if (e.key === 'Backspace') { e.preventDefault(); removeLast(); return; }
-    if (/^[a-zA-Z]$/.test(e.key)) { placeTile(e.key.toLowerCase()); return; }
+    if (/^[a-zA-Z]$/.test(e.key)) { placeLetter(e.key.toLowerCase()); return; }
     if (e.key === "'" || e.key === '-' || e.key === '\u2019') {
-      placeTile(e.key === '\u2019' ? "'" : e.key);
+      placeLetter(e.key === '\u2019' ? "'" : e.key);
     }
   }
   document.addEventListener('keydown', onPhysicalKey);
 
-  const root = el('div', { class: 'tt-field wt-field' }, [surface]);
-
-  renderSlots();
-  renderTiles();
-
   return {
-    root,
     surface,
+    nativeInput,
+    session,
     getValue: () => session.getValue(),
-    setValue: (v) => {
-      // rebuild the attempt from a string (restart/restore)
+    isComplete: () => completed || session.isComplete(),
+    revealHint,
+    shake,
+    renderSlots,
+    wordsView: () => session.wordsView(),
+    activeWordIndex: () => session.activeWordIndex(),
+    markCompleted() {
+      completed = true;
+      renderSlots();
+    },
+    resetValue(v) {
       session.reset();
       nativeInput.value = '';
       completed = false;
-      surface.classList.remove('is-complete');
+      surface.classList.remove('is-complete', 'is-locked');
       for (const ch of Array.from(String(v ?? ''))) {
         if (ch === ' ') continue;
         session.placeLetter(ch.toLowerCase());
       }
       renderSlots();
-      renderTiles();
     },
-    isComplete: () => completed || session.isComplete(),
-    shake,
-    render: () => { renderSlots(); renderTiles(); },
-    revealHint,
-    removeLast,
-    wordsView: () => session.wordsView(),
-    activeWordIndex: () => session.activeWordIndex(),
     destroy() {
       destroyed = true;
       document.removeEventListener('keydown', onPhysicalKey);
@@ -442,144 +396,88 @@ export function createTouchTypingField(opts = {}) {
 }
 
 /* ============================================================
-   2) Letter/word tiles (fill-blank)
+   1) Dictation field — listen-and-type & dialogue practice
    ============================================================ */
 
 /**
- * Create a tile-based answer builder for fill-blank exercises.
- * opts: {
- *   source:      String — the blank word (or multi-word phrase)
- *   ariaLabel:   String
- *   labels:      { backspace }        (clear-all button REMOVED in v9)
- *   onChanged:   (value) => void
- *   onComplete:  () => void          (all tiles placed)
- * }
- * Returns { root, getValue, isComplete, reset, lockCorrect,
- *           markIncorrect, shake, destroy }.
- * The value is built ONLY from taps; validation stays with the
- * original checkAnswer(acceptedAnswers) pipeline. Nothing locks
- * until the engine confirms the answer is correct.
+ * Create the native-keyboard dictation field.
+ * Returns { root, surface, getValue, setValue, isComplete, shake,
+ *           revealHint, removeLast, wordsView, activeWordIndex,
+ *           render, destroy }.
  */
-export function createLetterTiles(opts = {}) {
-  const labels = opts.labels || {};
-  const tiles = buildTiles(opts.source);
-  const placed = []; // { tile, btn, bankBtn }
+export function createTouchTypingField(opts = {}) {
+  const core = createNativeSessionField(opts);
+  const root = el('div', { class: 'tt-field wt-field' }, [core.surface]);
+  core.renderSlots();
+  return {
+    root,
+    surface: core.surface,
+    getValue: core.getValue,
+    setValue: (v) => core.resetValue(v),
+    isComplete: core.isComplete,
+    shake: core.shake,
+    render: () => core.renderSlots(),
+    revealHint: core.revealHint,
+    removeLast: () => {
+      const r = core.session.removeLastLetter();
+      if (r.removed) { core.renderSlots(); if (typeof opts.onChanged === 'function') opts.onChanged(core.getValue()); }
+    },
+    wordsView: core.wordsView,
+    activeWordIndex: core.activeWordIndex,
+    destroy: core.destroy,
+  };
+}
 
-  const root = el('div', { class: 'tiles-field', dir: 'ltr' });
-  const answerRow = el('div', { class: 'tiles-answer', 'aria-label': opts.ariaLabel || 'Answer' });
-  const bankRow = el('div', { class: 'tiles-bank', role: 'group', 'aria-label': opts.ariaLabel || 'Tiles' });
-  const actionsRow = el('div', { class: 'tiles-actions' });
-  root.append(answerRow, bankRow, actionsRow);
+/* ============================================================
+   2) Fill-blank field — engine-validated lock (no letter bank)
+   ============================================================ */
 
-  let locked = false;
-
-  const backBtn = el('button', {
-    class: 'tt-key tt-key-back tiles-action-btn', type: 'button',
-    'aria-label': labels.backspace || 'Backspace', text: '⌫',
+/**
+ * Create the native-keyboard fill-blank field.
+ * Same slots/session/hints as the dictation surface, plus:
+ *   lockCorrect()   — engine confirmed the answer → freeze green
+ *   markIncorrect() — engine flagged the answer → red shake, stays
+ *                     editable (never locks)
+ * Returns { root, surface, getValue, isComplete, reset, setValue,
+ *           lockCorrect, markIncorrect, shake, revealHint, destroy }.
+ */
+export function createNativeBlankField(opts = {}) {
+  let frozen = false;
+  const core = createNativeSessionField({
+    ...opts,
+    onComplete: () => {
+      if (!frozen) core.markCompleted();
+      if (typeof opts.onComplete === 'function') opts.onComplete();
+    },
   });
-  backBtn.addEventListener('pointerdown', (e) => e.preventDefault());
-  backBtn.addEventListener('click', () => removeLast());
-  actionsRow.append(backBtn); // v9: no clear-all button
-
-  function emit() {
-    if (typeof opts.onChanged === 'function') opts.onChanged(getValue());
-    if (!locked && placed.length === tiles.length && typeof opts.onComplete === 'function') {
-      opts.onComplete();
-    }
-  }
-
-  function place(tileText, bankBtn) {
-    if (locked) return;
-    if (placed.length >= tiles.length) return;
-    const placedBtn = el('button', { class: 'tile tile-placed', type: 'button', text: tileText });
-    placedBtn.addEventListener('pointerdown', (e) => e.preventDefault());
-    placedBtn.addEventListener('click', () => {
-      if (locked) return; // locked words cannot be removed
-      const at = placed.findIndex((p) => p.btn === placedBtn);
-      if (at < 0) return;
-      const [removed] = placed.splice(at, 1);
-      removed.bankBtn.classList.remove('tile-used');
-      removed.bankBtn.disabled = false;
-      placedBtn.remove();
-      soundErase();
-      emit();
-    });
-    placed.push({ tile: tileText, btn: placedBtn, bankBtn });
-    answerRow.append(placedBtn);
-    if (bankBtn) {
-      bankBtn.classList.add('tile-used');
-      bankBtn.disabled = true;
-    }
-    soundCorrect();
-    emit();
-  }
-
-  function removeLast() {
-    if (locked) return;
-    if (!placed.length) return;
-    const removed = placed.pop();
-    removed.btn.remove();
-    if (removed.bankBtn) {
-      removed.bankBtn.classList.remove('tile-used');
-      removed.bankBtn.disabled = false;
-    }
-    soundErase();
-    emit();
-  }
-
-  function reset() {
-    if (locked) return;
-    while (placed.length) removeLast();
-    emit();
-  }
-
-  for (const t of tiles) {
-    const b = el('button', { class: 'tile', type: 'button', text: t });
-    b.addEventListener('pointerdown', (e) => e.preventDefault());
-    b.addEventListener('click', () => { if (!b.disabled) place(t, b); });
-    bankRow.append(b);
-  }
-
-  function getValue() {
-    return placed.map((p) => p.tile).join('');
-  }
-
-  /** Engine confirmed the answer is correct → freeze green. */
-  function lockCorrect() {
-    locked = true;
-    answerRow.classList.add('is-locked');
-    for (const p of placed) {
-      p.btn.classList.add('is-locked');
-      p.btn.disabled = true;
-    }
-    for (const b of bankRow.querySelectorAll('.tile')) b.disabled = true;
-    backBtn.disabled = true;
-    soundLock();
-  }
-
-  /** Engine confirmed the answer is wrong → red state (editable). */
-  function markIncorrect() {
-    answerRow.classList.remove('is-wrong');
-    void answerRow.offsetWidth;
-    answerRow.classList.add('is-wrong');
-    window.setTimeout(() => answerRow.classList.remove('is-wrong'), 600);
-  }
-
-  function shake() {
-    root.classList.remove('lw-shake');
-    void root.offsetWidth;
-    root.classList.add('lw-shake');
-    window.setTimeout(() => root.classList.remove('lw-shake'), 420);
-  }
+  const root = el('div', { class: 'blank-field', dir: 'ltr' }, [core.surface]);
 
   return {
     root,
-    getValue,
-    isComplete: () => placed.length === tiles.length,
-    reset,
-    lockCorrect,
-    markIncorrect,
-    shake,
-    destroy() { root.remove(); },
+    surface: core.surface,
+    getValue: core.getValue,
+    isComplete: core.isComplete,
+    setValue: (v) => { if (!frozen) core.resetValue(v); },
+    reset: () => { if (!frozen) core.resetValue(''); },
+    revealHint: core.revealHint,
+    shake: core.shake,
+    /** Engine confirmed the answer is correct → freeze green. */
+    lockCorrect() {
+      if (frozen) return;
+      frozen = true;
+      core.markCompleted();
+      core.surface.classList.add('is-locked');
+      core.nativeInput.disabled = true;
+      soundLock();
+    },
+    /** Engine flagged the answer as wrong → red state (editable). */
+    markIncorrect() {
+      core.surface.classList.remove('is-wrong');
+      void core.surface.offsetWidth;
+      core.surface.classList.add('is-wrong');
+      window.setTimeout(() => core.surface.classList.remove('is-wrong'), 600);
+      core.shake();
+    },
+    destroy: core.destroy,
   };
 }

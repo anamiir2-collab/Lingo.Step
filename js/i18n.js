@@ -254,7 +254,7 @@ export const I18N = {
     viewAll: 'View all',
     moreGroupProfile: 'Profile',
     moreGroupPrefs: 'Preferences',
-    moreGroupLearning: 'Learning',
+    moreGroupLearning: 'Learning Preferences',
     moreGroupApp: 'Application',
     /* ---- v7 UI refresh: home header, search, filters, banner ---- */
     uiHello: 'Hello',
@@ -400,9 +400,14 @@ export const I18N = {
 
     /* ---- v9 More section categories ---- */
     moreCatLearning: 'Learning',
+    moreCatLearningDesc: 'Levels, lessons, listening and vocabulary',
     moreCatProgress: 'My Progress',
+    moreCatProgressDesc: 'Statistics, achievements, streak and history',
     moreCatSettings: 'Application Settings',
+    moreCatSettingsDesc: 'Audio, notifications, theme, language and backup',
+    moreCatPrefsDesc: 'Daily goal, Arabic support, grading and sounds',
     moreCatHelp: 'Help & Information',
+    moreCatHelpDesc: 'Guide, FAQ, profile and app information',
     learningLevels: 'Learning Levels',
     learningLevelsDesc: 'All levels from A1 to C1',
     lessonsSections: 'Lessons & Sections',
@@ -724,7 +729,7 @@ export const I18N = {
     viewAll: 'عرض الكل',
     moreGroupProfile: 'الملف الشخصي',
     moreGroupPrefs: 'التفضيلات',
-    moreGroupLearning: 'التدرب',
+    moreGroupLearning: 'تفضيلات التدرب',
     moreGroupApp: 'التطبيق',
     /* ---- v7 UI refresh: home header, search, filters, banner ---- */
     uiHello: 'أهلًا',
@@ -870,9 +875,14 @@ export const I18N = {
 
     /* ---- v9 More section categories ---- */
     moreCatLearning: 'التعلّم',
+    moreCatLearningDesc: 'المستويات والدروس والاستماع والمفردات',
     moreCatProgress: 'تقدمي',
+    moreCatProgressDesc: 'الإحصائيات والإنجازات والسلسلة والسجل',
     moreCatSettings: 'إعدادات التطبيق',
+    moreCatSettingsDesc: 'الصوت والتنبيهات والمظهر واللغة والنسخ الاحتياطي',
+    moreCatPrefsDesc: 'الهدف اليومي ودعم العربية والتصحيح والأصوات',
     moreCatHelp: 'المساعدة والمعلومات',
+    moreCatHelpDesc: 'الدليل والأسئلة الشائعة والملف الشخصي وبيانات التطبيق',
     learningLevels: 'مستويات التعلم',
     learningLevelsDesc: 'كل المستويات من A1 إلى C1',
     lessonsSections: 'الدروس والأقسام',

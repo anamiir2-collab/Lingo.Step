@@ -47,7 +47,7 @@ const SECTIONS_META = [
 let appRoot = null;
 let currentLang = 'en';
 
-const APP_VERSION = '10.0.0';
+const APP_VERSION = '10.1.0';
 
 /* ---- UI refresh (v7): shared helpers for the redesigned home/courses ---- */
 const ACCENTS = ['blue', 'orange', 'purple', 'teal', 'green'];
@@ -189,7 +189,7 @@ function updateNavState(routeName) {
   document.body.classList.toggle('route-dialogue-practice', routeName === 'dialogue-practice');
 
   // Desktop header links highlight per exact destination group.
-  const desktopMap = { home: 'home', sections: 'sections', section: 'sections', lesson: 'sections', vocabulary: 'vocabulary', dialogues: 'vocabulary', 'dialogue-practice': 'vocabulary', progress: 'progress', stats: 'progress', review: 'progress', achievements: 'progress', settings: 'more', more: 'more', profile: 'more', audio: 'more', help: 'more', faq: 'more', history: 'progress', placement: 'home' };
+  const desktopMap = { home: 'home', sections: 'sections', section: 'sections', lesson: 'sections', vocabulary: 'vocabulary', dialogues: 'vocabulary', 'dialogue-practice': 'vocabulary', progress: 'progress', stats: 'progress', review: 'progress', achievements: 'progress', settings: 'more', more: 'more', 'more-page': 'more', profile: 'more', audio: 'more', help: 'more', faq: 'more', history: 'progress', placement: 'home' };
   document.querySelectorAll('.nav-link').forEach((a) => {
     if (a.dataset.route === desktopMap[routeName]) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
@@ -197,7 +197,7 @@ function updateNavState(routeName) {
 
   // Mobile bar destinations; review/achievements live under Progress,
   // dialogues under Vocabulary, everything secondary under More.
-  const mobileMap = { home: 'home', review: 'progress', sections: 'sections', section: 'sections', lesson: 'sections', vocabulary: 'vocabulary', dialogues: 'vocabulary', 'dialogue-practice': 'vocabulary', progress: 'progress', stats: 'progress', achievements: 'progress', settings: 'more', more: 'more', profile: 'more', audio: 'more', help: 'more', faq: 'more', history: 'progress', placement: 'home' };
+  const mobileMap = { home: 'home', review: 'progress', sections: 'sections', section: 'sections', lesson: 'sections', vocabulary: 'vocabulary', dialogues: 'vocabulary', 'dialogue-practice': 'vocabulary', progress: 'progress', stats: 'progress', achievements: 'progress', settings: 'more', more: 'more', 'more-page': 'more', profile: 'more', audio: 'more', help: 'more', faq: 'more', history: 'progress', placement: 'home' };
   const target = mobileMap[routeName] || '';
   [...document.querySelectorAll('.mobile-nav-link')].forEach((a) => {
     const active = a.dataset.route === target;
@@ -1030,16 +1030,18 @@ async function viewAchievements(view) {
    ============================================================ */
 
 /* ============================================================
-   More hub (v9) — four professional categories, every row real:
+   More hub (v10) — a real navigation hub. Five categories, every
+   row real, every category its own dedicated full page:
      1. Learning        — levels, lessons, listening, pronunciation, vocabulary
      2. My Progress     — statistics, completed lessons, achievements,
                           streak, XP, history
      3. App Settings    — audio, speed, notifications, language, theme,
                           offline content, backup
-     4. Help & Info     — how to use, FAQ, about, version, contact
+     4. Learning Preferences — daily goal, show Arabic, strict grading, sounds
+     5. Help & Info     — how to use, FAQ, profile, about, version, contact
    ============================================================ */
 
-/* More-screen navigation row: icon tile + label + description + chevron */
+/* More-screen navigation row: icon tile + label + description */
 function moreLink(iconName, labelKey, descKey, href) {
   const L = currentLang;
   return el('a', { class: 'more-link-row', href }, [
@@ -1064,17 +1066,22 @@ function moreCtl(iconName, labelKey, control, descKey) {
   ]);
 }
 
-/* Each More category opens as a dedicated full page. */
-function moreCategory(labelKey, iconName, rows, open = false, slug = '') {
+/* Category descriptor — the hub card and its dedicated page share it. */
+function moreCategory(labelKey, iconName, descKey, rows, slug) {
+  return { slug, labelKey, iconName, descKey, rows };
+}
+
+/* Elegant hub card: the WHOLE card is one big tap target. No arrows,
+   no accordions — tapping opens the category's dedicated full page. */
+function moreCategoryCard(cat) {
   const L = currentLang;
-  const active = location.hash.replace(/^#\\/more-page\\//, '').split('?')[0] === slug;
-  const card = el('section', { class: 'card more-section more-cat' }, [
-    el('a', { class: 'more-section-summary more-page-link', href: active ? '#/more' : `#/more-page/${slug}` }, [
-      el('span', { class: 'more-section-heading' }, [icon(iconName), el('span', { text: t(L, labelKey) })]),
+  return el('a', { class: 'more-cat-card', href: `#/more-page/${cat.slug}` }, [
+    el('span', { class: 'more-cat-icon', 'aria-hidden': 'true' }, [icon(cat.iconName)]),
+    el('span', { class: 'more-cat-texts' }, [
+      el('strong', { text: t(L, cat.labelKey) }),
+      el('span', { class: 'muted small', text: t(L, cat.descKey) }),
     ]),
   ]);
-  if (active) card.append(el('div', { class: 'more-section-content more-list' }, rows));
-  return { slug, card };
 }
 
 async function viewMore(view, page = null) {
@@ -1229,26 +1236,26 @@ async function viewMore(view, page = null) {
   ]);
 
   /* ---------- category 1: Learning ---------- */
-  const learningCat = moreCategory('moreCatLearning', 'basics', [
+  const learningCat = moreCategory('moreCatLearning', 'basics', 'moreCatLearningDesc', [
     moreLink('grid', 'learningLevels', 'learningLevelsDesc', '#/sections'),
     moreLink('books', 'lessonsSections', 'lessonsSectionsDesc', '#/sections'),
     moreLink('headphones', 'listeningPractice', 'listeningPracticeDesc', '#/dialogues'),
     moreLink('audio', 'pronunciationPractice', 'pronunciationPracticeDesc', '#/audio'),
     moreLink('book', 'vocabularyPractice', 'vocabularyPracticeDesc', '#/vocabulary'),
-  ], true, 'learning');
+  ], 'learning');
 
   /* ---------- category 2: My Progress ---------- */
-  const progressCat = moreCategory('moreCatProgress', 'chart', [
+  const progressCat = moreCategory('moreCatProgress', 'chart', 'moreCatProgressDesc', [
     moreLink('stats', 'learningStats', 'learningStatsDesc', '#/stats'),
     moreLink('books', 'completedLessons', 'completedLessonsDesc', '#/progress'),
     moreLink('trophy', 'achievementsBadges', 'achievementsBadgesDesc', '#/achievements'),
     moreLink('flame', 'dailyStreakRow', 'dailyStreakDesc', '#/stats'),
     moreLink('sparkle', 'xpPoints', 'xpPointsDesc', '#/profile'),
     moreLink('clock', 'learningHistory', 'learningHistoryDesc', '#/history'),
-  ], false, 'progress');
+  ], 'progress');
 
   /* ---------- category 3: Application Settings ---------- */
-  const settingsCat = moreCategory('moreCatSettings', 'settings', [
+  const settingsCat = moreCategory('moreCatSettings', 'settings', 'moreCatSettingsDesc', [
     moreLink('audio', 'audioSettings', 'audioSettingsDesc', '#/audio'),
     moreCtl('gauge', 'playbackSpeedRow', speedSel, 'playbackSpeedDesc'),
     moreCtl('bell', 'notificationSettings', notifToggle, 'notificationSettingsDesc'),
@@ -1257,22 +1264,22 @@ async function viewMore(view, page = null) {
     moreCtl('theme', 'fontSize', fontScaleSel),
     moreCtl('package', 'offlineContent', offlineBtn, 'offlineContentDesc'),
     moreCtl('review', 'backupSection', el('div', { class: 'row' }, [exportBtn, importBtn, importInput])),
-  ], false, 'settings');
+  ], 'settings');
 
   /* ---------- learning preferences (existing, real) ---------- */
-  const prefsCat = moreCategory('moreGroupLearning', 'bulb', [
+  const prefsCat = moreCategory('moreGroupLearning', 'bulb', 'moreCatPrefsDesc', [
     moreCtl('target', 'dailyGoalSetting', goalInput),
     moreCtl('language', 'showArabic', arabicToggle),
     moreCtl('pen', 'strictGrading', strictToggle),
     moreCtl('volumeX', 'soundEffects', soundFxToggle),
-  ], false, 'preferences');
+  ], 'preferences');
 
   /* ---------- category 4: Help & Information ---------- */
-  const helpCat = moreCategory('moreCatHelp', 'info', [
+  const helpCat = moreCategory('moreCatHelp', 'info', 'moreCatHelpDesc', [
     moreLink('info', 'howToUse', 'howToUseDesc', '#/help'),
     moreLink('helpCircle', 'faqTitle', 'faqDesc', '#/faq'),
     moreLink('user', 'profileTitle', 'moreGroupProfile', '#/profile'),
-  ], false, 'help');
+  ], 'help');
 
   const aboutCard = el('div', { class: 'card more-about' }, [
     el('p', { class: 'small muted more-note', text: t(L, 'aboutText') }),
@@ -1295,14 +1302,13 @@ async function viewMore(view, page = null) {
   if (page) {
     const selected = categories.find((item) => item.slug === page);
     if (!selected) { navigate('more'); return; }
-    const titles = {
-      learning: 'moreCatLearning', progress: 'moreCatProgress',
-      settings: 'moreCatSettings', preferences: 'moreGroupLearning', help: 'moreCatHelp',
-    };
     view.replaceChildren(
       el('a', { class: 'more-page-back', href: '#/more' }, [icon('arrowLeft'), el('span', { text: t(L, 'navMore') })]),
-      el('div', { class: 'page-head' }, [el('h2', { text: t(L, titles[page]) })]),
-      selected.card,
+      el('div', { class: 'page-head' }, [
+        el('h2', { text: t(L, selected.labelKey) }),
+        el('p', { text: t(L, selected.descKey) }),
+      ]),
+      el('div', { class: 'card more-list' }, selected.rows),
       ...(page === 'settings' ? [el('div', { class: 'more-danger-zone' }, [clearBtn])] : []),
     );
     return;
@@ -1313,7 +1319,7 @@ async function viewMore(view, page = null) {
       el('p', { text: t(L, 'moreIntro') }),
     ]),
     profileCard,
-    ...categories.map((item) => item.card),
+    el('div', { class: 'more-cat-grid' }, categories.map((cat) => moreCategoryCard(cat))),
     aboutCard,
     el('div', { class: 'more-danger-zone' }, [clearBtn]),
   );
@@ -1522,26 +1528,6 @@ async function viewHistory(view) {
         el('a', { class: 'btn btn-primary mt', href: '#/sections' }, [iconLabel('books', t(L, 'lessonsSections'))]),
       ]),
   );
-}
-
-/* Compact, accessible accordion groups for the More page. */
-function moreSection(label, iconName, content, open = false) {
-  return el('details', { class: 'card more-section', open: open ? true : null }, [
-    el('summary', { class: 'more-section-summary' }, [
-      el('span', { class: 'more-section-heading' }, [icon(iconName), el('span', { text: label })]),
-      icon('arrowRight'),
-    ]),
-    content,
-  ]);
-}
-
-/* More-screen list row: leading icon tile + label + trailing control */
-function moreRow(iconEl, label, control) {
-  return el('div', { class: 'more-row' }, [
-    el('span', { class: 'more-icon', 'aria-hidden': 'true' }, [iconEl]),
-    el('span', { class: 'more-label', text: label }),
-    control,
-  ]);
 }
 
 /* ============================================================
