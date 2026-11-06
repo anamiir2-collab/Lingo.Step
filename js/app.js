@@ -1048,7 +1048,6 @@ function moreLink(iconName, labelKey, descKey, href) {
       el('strong', { text: t(L, labelKey) }),
       el('span', { class: 'muted small', text: t(L, descKey) }),
     ]),
-    icon('arrowRight'),
   ]);
 }
 
@@ -1227,7 +1226,6 @@ async function viewMore(view, page = null) {
       el('strong', { text: displayName || t(L, 'profileTitle') }),
       el('span', { class: 'muted small', text: displayName ? t(L, 'moreGroupProfile') : t(L, 'namePlaceholder') }),
     ]),
-    icon('arrowRight'),
   ]);
 
   /* ---------- category 1: Learning ---------- */
