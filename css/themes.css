@@ -93,10 +93,22 @@
   --hero-deco-1: rgba(255, 255, 255, .28);
   --hero-deco-2: rgba(255, 255, 255, .16);
 
+  /* ---------- premium gold identity (cards, borders, focus) ----------
+     Refined gold palette — never bright yellow. Used as elegant
+     outlines and soft highlights on every card in the app. */
+  --gold: #d6b36a;
+  --gold-bright: #e8cc8c;
+  --gold-deep: #b9954f;
+  --gold-soft: rgba(214, 179, 106, .24);
+  --gold-faint: rgba(214, 179, 106, .10);
+  --gold-tint: #faf5ea;
+  --gold-border: color-mix(in srgb, var(--gold) 62%, var(--border));
+  --gold-border-strong: color-mix(in srgb, var(--gold) 80%, var(--border-strong));
+
   /* accent tones for stat & section icons */
   --accent-teal: #0da393;
   --accent-pink: #7a7fd0;
-  --accent-gold: #e8951a;
+  --accent-gold: #b9954f;
 
   --level-tint: #e9f7fd;
   --toast-bg: #12354c;
@@ -174,7 +186,17 @@
 
   --accent-teal: #2ad4c0;
   --accent-pink: #9ba0e0;
-  --accent-gold: #ffb32c;
+  --accent-gold: #d6b36a;
+
+  /* premium gold identity — slightly deepened for dark surfaces */
+  --gold: #cfa95e;
+  --gold-bright: #e8cc8c;
+  --gold-deep: #a8853f;
+  --gold-soft: rgba(207, 169, 94, .26);
+  --gold-faint: rgba(207, 169, 94, .10);
+  --gold-tint: #262115;
+  --gold-border: color-mix(in srgb, var(--gold) 55%, var(--border));
+  --gold-border-strong: color-mix(in srgb, var(--gold) 75%, var(--border-strong));
 
   --level-tint: #112c3b;
   --toast-bg: #eaf3f8;
@@ -252,7 +274,17 @@
 
     --accent-teal: #2ad4c0;
     --accent-pink: #9ba0e0;
-    --accent-gold: #ffb32c;
+    --accent-gold: #d6b36a;
+
+    /* premium gold identity — slightly deepened for dark surfaces */
+    --gold: #cfa95e;
+    --gold-bright: #e8cc8c;
+    --gold-deep: #a8853f;
+    --gold-soft: rgba(207, 169, 94, .26);
+    --gold-faint: rgba(207, 169, 94, .10);
+    --gold-tint: #262115;
+    --gold-border: color-mix(in srgb, var(--gold) 55%, var(--border));
+    --gold-border-strong: color-mix(in srgb, var(--gold) 75%, var(--border-strong));
 
     --level-tint: #112c3b;
     --toast-bg: #eaf3f8;
