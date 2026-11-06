@@ -349,6 +349,69 @@ The repository can use its Android APK CI workflow to package the web applicatio
 
 ---
 
+
+## 🔄 Continuous Integration & Deployment
+
+GitHub Actions automates validation, testing, deployment, and Android packaging.
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| [Deploy to GitHub Pages](.github/workflows/deploy.yml) | Push to `main` or manual run | Runs project validation and tests, then deploys the site to GitHub Pages |
+| [Android APK](.github/workflows/android.yml) | Push to `main`, pull request, or manual run | Runs validation and tests, builds the web app, generates a temporary Capacitor Android project, and produces a debug APK |
+| [Validate](.github/workflows/validate.yml) | Pull request or manual run | Runs the project validation gate and test suite |
+
+**Android build environment:** CI uses Node.js 20 and Temurin JDK 21. The generated Android project is created in the workflow workspace; Gradle, Kotlin, and Java project files are not maintained as committed application source.
+
+After a successful main-branch Android workflow run, the workflow is configured to publish the `LingoStep-v10.0.0-debug.apk` artifact and a GitHub Release tagged `v10.0.0`. Check the latest workflow run or Releases page for the currently available build.
+
+- [View workflow runs](../../actions)
+- [View releases](../../releases)
+- [Android build guide](docs/ANDROID-APK.md)
+
+## 🔐 Privacy & Local-First Data
+
+LingoStep is designed around local learning data:
+
+- Core learning progress is stored on the learner's device.
+- Backup and restore gives learners a way to move supported progress data.
+- The service worker caches same-origin app resources and lesson content for offline use.
+- The service worker does not cache cross-origin requests or POST responses.
+- No account is required for the core local learning experience.
+
+Review the source code and browser/device permissions to understand the exact behavior of any optional platform feature.
+
+## 🔔 Device Features
+
+The project includes Capacitor integrations for supported native capabilities, including:
+
+- Local notifications.
+- Text-to-speech.
+- Native application and status-bar integration.
+
+Availability and behavior depend on the platform, browser, installed app build, and granted device permissions. Web browsers may expose different capabilities from the Android APK.
+
+## 📱 PWA Details
+
+The web app manifest configures LingoStep as an installable, standalone application:
+
+- Standalone display mode.
+- Portrait-primary orientation.
+- App icons in standard and maskable sizes.
+- Education and productivity categories.
+- Theme and background colors for the installed experience.
+
+For the best mobile experience, use an up-to-date version of Chrome on Android and install the app from its supported install prompt.
+
+## 🧭 Repository Links
+
+- [Source code](https://github.com/anamiir2-collab/Lingo.Step)
+- [Issues and bug reports](https://github.com/anamiir2-collab/Lingo.Step/issues)
+- [Pull requests](https://github.com/anamiir2-collab/Lingo.Step/pulls)
+- [GitHub Actions](https://github.com/anamiir2-collab/Lingo.Step/actions)
+- [Releases](https://github.com/anamiir2-collab/Lingo.Step/releases)
+- [License: MIT](LICENSE)
+
+
 ## 🤝 Contributing
 
 Contributions are welcome!
