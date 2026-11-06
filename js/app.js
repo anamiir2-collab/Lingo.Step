@@ -242,6 +242,7 @@ async function handleRoute(route) {
     if (route.name === 'placement') return await renderPlacementView(view); // v8: restored access (feature existed but was unreachable)
     if (route.name === 'settings') { navigate('more'); return; } // legacy route → More hub
     if (route.name === 'more') return await viewMore(view);
+    if (route.name === 'more-page') return await viewMore(view, route.params[0]);
     if (route.name === 'profile') return await viewProfile(view);
     if (route.name === 'audio') return await viewAudioSettings(view);
     if (route.name === 'help') return await viewHelp(view);
@@ -1064,19 +1065,20 @@ function moreCtl(iconName, labelKey, control, descKey) {
   ]);
 }
 
-/* Category card with a heading and a list of rows */
-function moreCategory(labelKey, iconName, rows, open = false) {
+/* Each More category opens as a dedicated full page. */
+function moreCategory(labelKey, iconName, rows, open = false, slug = '') {
   const L = currentLang;
-  return el('details', { class: 'card more-section more-cat', open: open ? true : null }, [
-    el('summary', { class: 'more-section-summary' }, [
+  const active = new URLSearchParams(location.hash.split('?')[1] || '').get('page') === slug;
+  const card = el('section', { class: 'card more-section more-cat' }, [
+    el('a', { class: 'more-section-summary more-page-link', href: active ? '#/more' : `#/more-page/${slug}` }, [
       el('span', { class: 'more-section-heading' }, [icon(iconName), el('span', { text: t(L, labelKey) })]),
-      icon('arrowRight'),
     ]),
-    el('div', { class: 'more-section-content more-list' }, rows),
   ]);
+  if (active) card.append(el('div', { class: 'more-section-content more-list' }, rows));
+  return { slug, card };
 }
 
-async function viewMore(view) {
+async function viewMore(view, page = null) {
   loading(view);
   docTitle('navMore');
   const L = currentLang;
@@ -1291,17 +1293,29 @@ async function viewMore(view) {
     }),
   ]);
 
+  const categories = [learningCat, progressCat, settingsCat, prefsCat, helpCat];
+  if (page) {
+    const selected = categories.find((item) => item.slug === page);
+    if (!selected) { navigate('more'); return; }
+    const titles = {
+      learning: 'moreCatLearning', progress: 'moreCatProgress',
+      settings: 'moreCatSettings', preferences: 'moreGroupLearning', help: 'moreCatHelp',
+    };
+    view.replaceChildren(
+      el('a', { class: 'more-page-back', href: '#/more' }, [icon('arrowLeft'), el('span', { text: t(L, 'navMore') })]),
+      el('div', { class: 'page-head' }, [el('h2', { text: t(L, titles[page]) })]),
+      selected.card,
+      ...(page === 'settings' ? [el('div', { class: 'more-danger-zone' }, [clearBtn])] : []),
+    );
+    return;
+  }
   view.replaceChildren(
     el('div', { class: 'page-head' }, [
       el('h2', { text: t(L, 'moreTitle') }),
       el('p', { text: t(L, 'moreIntro') }),
     ]),
     profileCard,
-    learningCat,
-    progressCat,
-    settingsCat,
-    prefsCat,
-    helpCat,
+    ...categories.map((item) => item.card),
     aboutCard,
     el('div', { class: 'more-danger-zone' }, [clearBtn]),
   );
