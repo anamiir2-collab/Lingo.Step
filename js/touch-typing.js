@@ -291,6 +291,7 @@ export function createTouchTypingField(opts = {}) {
     spellcheck: 'false', 'aria-label': opts.ariaLabel || 'Type the sentence',
   });
   nativeInput.setAttribute('enterkeyhint', 'done');
+  surface.append(nativeInput);
   nativeInput.addEventListener('beforeinput', (e) => {
     if (destroyed || completed) { e.preventDefault(); return; }
     if (e.inputType === 'deleteContentBackward') {
