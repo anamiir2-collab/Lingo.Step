@@ -284,48 +284,34 @@ export function createTouchTypingField(opts = {}) {
     surface.classList.toggle('is-complete', completed);
   }
 
-  /* ----- tile bank for the active word ----- */
-  const tilesWrap = el('div', { class: 'wt-tiles-wrap' });
-  const tilesRow = el('div', { class: 'wt-tiles', role: 'group', 'aria-label': opts.tilesAria || labels.tilesAria || 'Letter tiles' });
-  const backBtn = el('button', {
-    class: 'wt-back', type: 'button',
-    'aria-label': labels.backspace || 'Backspace', title: labels.backspace || 'Backspace',
-    text: '⌫',
+  /* ----- native phone keyboard input (no in-app letter pad) ----- */
+  const nativeInput = el('input', {
+    class: 'lw-native-input', type: 'text', inputmode: 'text',
+    autocomplete: 'off', autocapitalize: 'none', autocorrect: 'off',
+    spellcheck: 'false', 'aria-label': opts.ariaLabel || 'Type the sentence',
   });
-  backBtn.addEventListener('pointerdown', (e) => e.preventDefault());
-  backBtn.addEventListener('click', () => removeLast());
-  tilesWrap.append(tilesRow, backBtn);
-
-  function renderTiles() {
-    tilesRow.replaceChildren();
-    consumedTiles = [];
-    const view = session.wordsView()[session.activeWordIndex()];
-    if (!view || view.state === 'locked') { tilesWrap.classList.add('is-done'); return; }
-    tilesWrap.classList.remove('is-done');
-    const word = view.text.replace(/[.,!?;:]+$/, '');
-    const tiles = buildWordTiles(word);
-    for (const ch of tiles) {
-      const b = el('button', { class: 'wt-tile', type: 'button', text: ch, 'aria-label': ch });
-      b.addEventListener('pointerdown', (e) => e.preventDefault()); // never steal focus
-      b.addEventListener('click', () => placeTile(ch, b));
-      tilesRow.append(b);
+  nativeInput.setAttribute('enterkeyhint', 'done');
+  nativeInput.addEventListener('beforeinput', (e) => {
+    if (destroyed || completed) { e.preventDefault(); return; }
+    if (e.inputType === 'deleteContentBackward') {
+      e.preventDefault(); removeLast(); return;
     }
-  }
-
-  function consumeTile(ch, btn) {
-    const target = btn && !btn.disabled ? btn : tilesRow.querySelector(`.wt-tile:not(.is-used)[data-ch="${ch}"]`);
-    if (!target) return;
-    target.classList.add('is-used');
-    target.setAttribute('aria-hidden', 'true');
-    consumedTiles.push(target);
-  }
-
-  function unconsumeLast() {
-    const t = consumedTiles.pop();
-    if (!t) return;
-    t.classList.remove('is-used');
-    t.removeAttribute('aria-hidden');
-  }
+    if (e.inputType === 'insertText' && e.data) {
+      e.preventDefault();
+      for (const ch of Array.from(e.data)) {
+        if (/^[a-z]$/i.test(ch) || ch === "'" || ch === '-') placeTile(ch.toLowerCase());
+      }
+    }
+  });
+  nativeInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); if (typeof opts.onEnter === 'function') opts.onEnter(); }
+  });
+  surface.addEventListener('pointerdown', () => {
+    if (!completed && !destroyed) nativeInput.focus({ preventScroll: true });
+  });
+  function renderTiles() { /* the system keyboard replaces the old tile bank */ }
+  function consumeTile() {}
+  function unconsumeLast() {}
 
   function placeTile(ch, btn) {
     if (destroyed || completed) return;
@@ -403,7 +389,7 @@ export function createTouchTypingField(opts = {}) {
 
   /* ----- desktop physical keyboard (optional, never on mobile) ----- */
   function onPhysicalKey(e) {
-    if (destroyed) return;
+    if (destroyed || e.target === nativeInput) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === 'Enter') {
       if (typeof opts.onEnter === 'function') { e.preventDefault(); opts.onEnter(); }
@@ -417,7 +403,7 @@ export function createTouchTypingField(opts = {}) {
   }
   document.addEventListener('keydown', onPhysicalKey);
 
-  const root = el('div', { class: 'tt-field wt-field' }, [surface, tilesWrap]);
+  const root = el('div', { class: 'tt-field wt-field' }, [surface]);
 
   renderSlots();
   renderTiles();
@@ -429,6 +415,7 @@ export function createTouchTypingField(opts = {}) {
     setValue: (v) => {
       // rebuild the attempt from a string (restart/restore)
       session.reset();
+      nativeInput.value = '';
       completed = false;
       surface.classList.remove('is-complete');
       for (const ch of Array.from(String(v ?? ''))) {
@@ -448,6 +435,7 @@ export function createTouchTypingField(opts = {}) {
     destroy() {
       destroyed = true;
       document.removeEventListener('keydown', onPhysicalKey);
+      nativeInput.remove();
     },
   };
 }
